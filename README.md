@@ -25,7 +25,7 @@ const SampleComponent = () => {
       {
         // allow the user to make choices that affect what we load
         ['posts', 'comments'].map(
-          item => (<button disabled={ item === dataToLoad } onClick={ () => setDataToLoad(item)>{ item }</button>)
+          item => (<button disabled={ item === dataToLoad } onClick={ () => setDataToLoad(item) }>{ item }</button>)
         )
       }
       <StatusWrapper fetched={resource}>
