@@ -15,15 +15,35 @@ npm install --save fetch-hooks
 ```tsx
 import * as React from 'react'
 
-import MyComponent from 'fetch-hooks'
+import { StatusWrapper, useFetch } from 'fetch-hooks';
 
-class Example extends React.Component {
-  render () {
-    return (
-      <MyComponent />
-    )
-  }
+const SampleComponent = () => {
+  const [dataToLoad, setDataToLoad] = useState('posts');
+  const [resource] = useFetch('https://my-json-server.typicode.com/typicode/demo/' + dataToLoad, { method: 'get', headers: {} } );
+  return (
+    <div>
+      {
+        // allow the user to make choices that affect what we load
+        ['posts', 'comments'].map(
+          item => (<button disabled={ item === dataToLoad } onClick={ () => setDataToLoad(item)>{ item }</button>)
+        )
+      }
+      <StatusWrapper fetched={resource}>
+        <pre>
+          {
+            JSON.stringify(resource, null, 2)
+          }
+        </pre>
+      </StatusWrapper>
+    </div>
+  );
 }
+
+ReactDOM.render(
+  <SampleComponent />,
+  document.getElementById('root')
+);
+
 ```
 
 ## License
