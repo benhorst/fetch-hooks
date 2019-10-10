@@ -161,7 +161,9 @@ export const StatusWrapper = (props:StatusWrapperProps) => {
         )
       }
       {
-        !fetched.error && fetched.loaded && (
+        // if you want the children to show while loading (after initial load)
+        // then just remove the middle expression and let it ride.
+        !fetched.error && !fetched.loading && fetched.loaded && (
           <div className="success">
             This is the data!
             { children }
