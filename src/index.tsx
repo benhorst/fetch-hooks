@@ -109,25 +109,18 @@ export const useFetch = (
             if (body) {
               json = options.parser(body);
             }
-            // we are setting a timeout just so that load is more clear
-            // TODO: remove this synthetic delay.
-            setTimeout(
-              () => {
-                dispatch({
-                  type: 'end-load',
-                  payload: {
-                    request: {
-                      status,
-                    },
-                    loaded: true,
-                    loading: false,
-                    error,
-                    data: json || body
-                  }
-                });
-              },
-              3000
-            );
+            dispatch({
+              type: 'end-load',
+              payload: {
+                request: {
+                  status,
+                },
+                loaded: true,
+                loading: false,
+                error,
+                data: json || body
+              }
+            });
           } catch (ex) {
             // the parser failed to get what it wanted.
             dispatch({
