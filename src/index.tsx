@@ -89,7 +89,7 @@ export const useFetch = (
         // first stage of response, should be 'ok' or not
         .then(response => {
           if (!response.ok) {
-            error = true;
+            error = { message: 'Http-status not OK:' + response.status };
           }
           status = response.status;
           return response.text();
