@@ -174,18 +174,18 @@ export const StatusWrapper = (props:StatusWrapperProps) => {
   )
 };
 
-// const SampleComponent = () => {
-//   const [data] = useFetch('https://my-json-server.typicode.com/typicode/demo/posts', { method: 'get', headers: {} } );
-//   return (
-//     <StatusWrapper fetched={data}>
-//       <pre>
-//         {
-//           JSON.stringify(data, null, 2)
-//         }
-//       </pre>
-//     </StatusWrapper>
-//   );
-// }
+export const ExampleComponent = () => {
+  const [data] = useFetch('https://my-json-server.typicode.com/typicode/demo/posts', { method: 'get', headers: {} } );
+  return (
+    <StatusWrapper fetched={data}>
+      <pre>
+        {
+          JSON.stringify(data, null, 2)
+        }
+      </pre>
+    </StatusWrapper>
+  );
+}
 
 // ReactDOM.render(
 //   <SampleComponent />,
