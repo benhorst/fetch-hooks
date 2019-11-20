@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 
-import ExampleComponent from 'fetch-hooks'
+import { ExampleComponent } from 'fetch-hooks'
 
 export default class App extends Component {
   render () {
