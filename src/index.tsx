@@ -1,42 +1,86 @@
 import * as React from 'react';
 const { useReducer, useEffect, useState } = React;
 
+export const ERROR_CODES = {
+  FAIL_FETCH: -100, // the network call failed or was interrupted, usually
+  FAIL_PARSE: -200, // the parser provided threw. (usually json)
+  FAIL_PARSE_TEXT: -201, // response.text() threw.
+}
 // NOTE TO FRIENDS: sorry about the semi-inconsistent semi-colons.
 
 interface FetchRequest {
-  url: string
+  url?: string
+  status?: number
+  // this promise is currently the FetchPromise.
+  // TODO: likely a consumer would actually want the ParsedPromise,
+  //       aka: the thing that has error/data in it, NOT the pre-parsed response.
+  promise?: Promise<any>
+}
+interface FetchRequestEndPayload {
   status: number
+}
+interface FetchRequestStartPayload {
+  url: string
   promise: Promise<any>
 }
-interface FetchResource<T> {
-  data: T
-  error: any
-  loading: boolean
-  loaded: boolean
-  request: null | FetchRequest
-}
 
-const PRISTINE_FETCH_STATE = {
+export const PRISTINE_FETCH_STATE = {
   data: null,
   error: null,
   loading: false,
   loaded: false,
   request: null,
 }
-interface Action {
-  type: string
-  payload: any
+
+interface StartLoadAction {
+  type: 'start-load',
+  payload: FetchRequestStartPayload
 }
+interface EndLoadFailAction {
+  type: 'end-load',
+  payload: {
+    data?: undefined
+    error: any,
+    request: FetchRequestEndPayload
+  }
+}
+interface EndLoadSuccessAction {
+  type: 'end-load',
+  payload: {
+    data: any
+    error?: undefined
+    request: FetchRequestEndPayload
+  }
+}
+type EndLoadAction = EndLoadSuccessAction | EndLoadFailAction;
+
+interface InitAction {
+  type: 'init',
+  payload?: undefined
+}
+interface AbortAction {
+  type: 'abort',
+  payload?: undefined
+}
+type FetchReducerAction = StartLoadAction | EndLoadAction | InitAction | AbortAction;
 interface UseFetchOptions {
   parser: (input:string) => any
 }
+interface FetchState {
+  data: any | null,
+  error: any | null,
+  loading: boolean,
+  loaded: boolean,
+  request?: FetchRequest | null,
+}
 
-const fetchReducer = (state: FetchResource<any>, action: Action) => {
-  const { type, payload } = action;
+export const fetchReducer = (state: FetchState, action: FetchReducerAction): FetchState => {
+  const { type } = action;
   switch (type) {
     case 'init':
-      return PRISTINE_FETCH_STATE;
-    case 'start-load':
+      return { ...PRISTINE_FETCH_STATE };
+    case 'start-load': {
+      const { payload } = action as StartLoadAction;
       // on initial state, the status=0 because we don't know yet, but the previous one is gone
       return {
         ...state,
@@ -47,7 +91,9 @@ const fetchReducer = (state: FetchResource<any>, action: Action) => {
           promise: payload.promise,
         },
       };
-    case 'end-load':
+    }
+    case 'end-load': {
+      const { payload } = action as EndLoadAction;
       return {
         ...state,
         data: payload.data,
@@ -59,11 +105,14 @@ const fetchReducer = (state: FetchResource<any>, action: Action) => {
           ...payload.request,
         },
       };
-    case 'abort':
+    }
+    case 'abort': {
+      // const { payload } = action as EndLoadAction;
       return {
         ...PRISTINE_FETCH_STATE,
         error: 'aborted'
       };
+    }
     default:
       throw new Error();
   }
@@ -99,6 +148,9 @@ export const useFetch = (
             type: 'end-load',
             payload: {
               error: { message: 'failed to fetch.', inner: err },
+              request: {
+                status: ERROR_CODES.FAIL_FETCH,
+              }
             }
           });
         })
@@ -115,8 +167,6 @@ export const useFetch = (
                 request: {
                   status,
                 },
-                loaded: true,
-                loading: false,
                 error,
                 data: json || body
               }
@@ -127,6 +177,9 @@ export const useFetch = (
               type: 'end-load',
               payload: {
                 error: { message: 'Failed to parse the body of the response.', inner: { exception: ex, body } },
+                request: {
+                  status: ERROR_CODES.FAIL_PARSE,
+                }
               }
             });
           }
@@ -136,7 +189,10 @@ export const useFetch = (
           dispatch({
             type: 'end-load',
             payload: {
-              error: { message: 'failed to fetch.', inner: err },
+              error: { message: 'Failed to parse the body text completely.', inner: err },
+              request: {
+                status: ERROR_CODES.FAIL_PARSE_TEXT,
+              }
             }
           });
         });
@@ -153,8 +209,8 @@ export const useFetch = (
 };
 
 interface StatusWrapperProps {
-  fetched:FetchResource<any>
-  children:React.ReactNode
+  fetched: FetchState
+  children: React.ReactNode
 }
 export const StatusWrapper = (props:StatusWrapperProps) => {
   const { fetched, children } = props;
