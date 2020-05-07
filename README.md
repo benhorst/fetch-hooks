@@ -1,3 +1,18 @@
+# NOTICE OF DEPRECATION
+
+You should definitely be using swr instead of this. https://www.npmjs.com/package/swr
+It's just a lot better at what it does! Basically hits all the notes of what I wanted this library to accomplish. Props to zeit.co or vercel, whichever they prefer. Great job.
+
+
+
+
+
+
+
+Historical purposes below.
+---------------
+
+
 # fetch-hooks
 
 > React hooks wrapping Fetch
